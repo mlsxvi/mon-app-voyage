@@ -3,182 +3,297 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Itinéraire de Voyage</title>
-    <!-- Bibliothèques externes -->
+    <title>Voyage Italie 2026 - Programme Officiel</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- Lucide Icons (SVG) -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            -webkit-tap-highlight-color: transparent;
+            scroll-behavior: smooth;
+        }
+
+        .active-tab { 
+            background-color: white; 
+            color: #4338ca; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Statut Terminé */
+        .step-completed {
+            border-color: #e2e8f0 !important;
+            background-color: #f8fafc !important;
+            opacity: 0.8;
+        }
+
+        /* Statut Actuel */
+        .step-current {
+            border-color: #4338ca !important;
+            border-width: 2px !important;
+            box-shadow: 0 10px 25px -5px rgba(67, 56, 202, 0.2);
+        }
+
+        /* Statut À venir - Plus coloré */
+        .step-future {
+            border-color: #e0e7ff;
+            background-color: #ffffff;
+        }
+
+        .pulse-time {
+            animation: textPulse 2s infinite ease-in-out;
+        }
+
+        @keyframes textPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .hidden { display: none; }
+
+        .fade-in {
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
-<body class="bg-slate-50">
-    <div id="root"></div>
+<body class="bg-slate-50 pb-40 text-slate-900">
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+    <!-- HEADER -->
+    <header class="bg-indigo-900 text-white p-6 sticky top-0 z-50 shadow-xl border-b border-indigo-800">
+        <div class="max-w-md mx-auto">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-xl font-black tracking-tight flex items-center gap-2">
+                        <i data-lucide="compass" class="text-indigo-400 w-5 h-5"></i> ITALIE 2026
+                    </h1>
+                </div>
+                <div class="bg-indigo-800/50 px-3 py-1.5 rounded-full backdrop-blur-md border border-white/10">
+                    <span id="global-pct" class="text-xs font-black text-indigo-300">0%</span>
+                </div>
+            </div>
+            
+            <nav class="flex bg-indigo-950/40 p-1 rounded-2xl border border-white/5 shadow-inner">
+                <button onclick="switchView('list')" id="nav-list" class="active-tab flex-1 py-3 rounded-xl text-[10px] font-extrabold transition-all text-center tracking-widest uppercase">
+                    Vue Globale
+                </button>
+                <button onclick="switchView('detail')" id="nav-detail" class="flex-1 py-3 rounded-xl text-[10px] font-extrabold transition-all text-indigo-200/60 text-center tracking-widest uppercase">
+                    Programme
+                </button>
+            </nav>
+        </div>
+    </header>
 
-        // Importation manuelle des icônes Lucide pour l'environnement navigateur
-        const Icon = ({ name, className }) => {
-            useEffect(() => {
-                if (window.lucide) {
-                    window.lucide.createIcons();
+    <main class="max-w-md mx-auto p-4">
+        <div id="view-list" class="space-y-4 fade-in"></div>
+        <div id="view-detail" class="hidden fade-in">
+            <div class="mb-10 px-2 flex justify-between items-end">
+                <div>
+                    <p id="day-date" class="text-[10px] font-bold text-indigo-600 uppercase tracking-[0.2em] mb-1"></p>
+                    <h2 id="day-title" class="text-3xl font-black text-slate-900">Jour</h2>
+                </div>
+                <div class="bg-white p-2 rounded-xl border border-slate-100 shadow-sm">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-amber-500"></i>
+                </div>
+            </div>
+            <div id="timeline" class="space-y-6"></div>
+        </div>
+    </main>
+
+    <!-- BARRE FLOTTANTE -->
+    <div class="fixed bottom-8 left-1/2 -translate-x-1/2 w-[92%] max-w-sm z-50">
+        <div class="bg-slate-900 shadow-2xl rounded-full p-2 flex justify-between items-center border border-white/10 backdrop-blur-md">
+            <button onclick="switchView('list')" class="p-4 text-white/40 hover:text-white transition-colors"><i data-lucide="calendar" class="w-5 h-5"></i></button>
+            <button onclick="switchView('list')" class="bg-indigo-600 text-white p-4 rounded-full -mt-2 border-4 border-slate-50 shadow-xl active:scale-95 transition-all"><i data-lucide="map" class="w-6 h-6"></i></button>
+            <button onclick="switchView('detail')" class="p-4 text-white/40 hover:text-white transition-colors"><i data-lucide="clipboard-list" class="w-5 h-5"></i></button>
+        </div>
+    </div>
+
+    <script>
+        const tripData = [
+            {
+                id: 1, day: "Jour 1", date: "Vendredi 3 Juillet 2026", summary: "Milan : Renaissance",
+                steps: [
+                    { start: "08:15", end: "08:30", act: "Secteur Cadorna", dur: "15 min", icon: "map-pin", comm: "Arrivée tôt dans le secteur de Magenta.", price: "2,20€", web: "https://www.atm.it", map: "https://www.google.com/maps/search/?api=1&query=Cadorna+Milan", done: true },
+                    { start: "08:30", end: "08:45", act: "La Cène (Cenacolo)", dur: "15 min", icon: "camera", comm: "Visite strictement limitée. Réservation 3-4 mois d'avance.", price: "15,00€", web: "https://cenacolovinciano.org/", map: "https://www.google.com/maps/search/?api=1&query=Santa+Maria+delle+Grazie+Milan", done: false },
+                    { start: "09:00", end: "09:45", act: "Église San Maurizio", dur: "45 min", icon: "info", comm: "Chapelle Sixtine de Milan. Fresques Renaissance.", price: "Gratuit", map: "https://www.google.com/maps/search/?api=1&query=San+Maurizio+al+Monastero+Maggiore", done: false }
+                ]
+            },
+            {
+                id: 2, day: "Jour 2", date: "Samedi 4 Juillet 2026", summary: "Venise : Arrivée",
+                steps: [
+                    { start: "12:50", end: "13:10", act: "Aéroport Marco-Polo", dur: "xxh20 - xxh50", icon: "plane", comm: "Autobus 35 vers Venezia Piazzale Roma (aucun arrêt)", price: "10€", web: "https://www.atvo.it", map: "https://www.google.com/maps/search/?api=1&query=Aeroporto+di+Venezia-Marco+Polo", done: true },
+                    { transition: "30 min de marche (1,4 km)", icon: "footprints" }, 
+                    { start: "13:30", end: "14:00", act: "Airbnb Venise", dur: "30 min", icon: "home", comm: "Dépôt des bagages.", price: "-", map: "https://www.google.com/maps/search/?api=1&query=Venezia+Airbnb", done: false },
+                    { start: "14:40", end: "15:40", act: "Teatro la Fenice", dur: "1h00", icon: "music", comm: "Billet à acheter à l'avance pour la visite.", price: "15€", web: "https://www.teatrolafenice.it", map: "https://www.google.com/maps/search/?api=1&query=Teatro+la+Fenice+Venice", done: false }
+                ]
+            }
+        ];
+
+        let selectedDayIdx = 1;
+
+        function switchView(view) {
+            const list = document.getElementById('view-list');
+            const detail = document.getElementById('view-detail');
+            list.classList.toggle('hidden', view !== 'list');
+            detail.classList.toggle('hidden', view !== 'detail');
+            document.getElementById('nav-list').className = view === 'list' ? 'active-tab flex-1 py-3 rounded-xl text-[10px] font-extrabold text-center tracking-widest uppercase' : 'flex-1 py-3 rounded-xl text-[10px] font-extrabold text-indigo-200/60 text-center tracking-widest uppercase';
+            document.getElementById('nav-detail').className = view === 'detail' ? 'active-tab flex-1 py-3 rounded-xl text-[10px] font-extrabold text-center tracking-widest uppercase' : 'flex-1 py-3 rounded-xl text-[10px] font-extrabold text-indigo-200/60 text-center tracking-widest uppercase';
+            if(view === 'detail') renderTimeline();
+            if(view === 'list') renderDayList();
+        }
+
+        function goToDay(idx) { selectedDayIdx = idx; switchView('detail'); }
+
+        function toggleStep(idx) {
+            tripData[selectedDayIdx].steps[idx].done = !tripData[selectedDayIdx].steps[idx].done;
+            renderTimeline();
+        }
+
+        function renderDayList() {
+            const container = document.getElementById('view-list');
+            container.innerHTML = tripData.map((day, idx) => `
+                <div onclick="goToDay(${idx})" class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex items-center gap-5 cursor-pointer active:scale-[0.98] transition-all hover:shadow-md">
+                    <div class="w-14 h-14 ${idx === selectedDayIdx ? 'bg-indigo-700 text-white shadow-lg' : 'bg-slate-100 text-slate-400'} rounded-2xl flex flex-col items-center justify-center font-bold">
+                        <span class="text-[10px] uppercase opacity-70">${day.date.split(' ')[2].substring(0,4)}</span>
+                        <span class="text-2xl">${day.date.split(' ')[1]}</span>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-black text-slate-800 text-base mb-1">${day.summary}</h3>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.15em]">${day.day}</p>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-slate-200"></i>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function renderTimeline() {
+            const container = document.getElementById('timeline');
+            const day = tripData[selectedDayIdx];
+            document.getElementById('day-title').innerText = day.day;
+            document.getElementById('day-date').innerText = day.date;
+
+            const currentIdx = day.steps.findIndex(s => !s.done && s.act);
+
+            container.innerHTML = day.steps.map((s, i) => {
+                if (s.transition) {
+                    return `
+                    <div class="flex items-center justify-center gap-4 py-2 px-8 opacity-40">
+                        <div class="h-[1px] flex-1 bg-slate-200"></div>
+                        <div class="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-widest px-4">
+                            <i data-lucide="footprints" class="w-3 h-3"></i>
+                            ${s.transition}
+                        </div>
+                        <div class="h-[1px] flex-1 bg-slate-200"></div>
+                    </div>
+                    `;
                 }
-            }, [name]);
-            return <i data-lucide={name} className={className}></i>;
-        };
 
-        const App = () => {
-            const [tripData, setTripData] = useState([
-                {
-                    id: 1,
-                    day: "Jour 1",
-                    date: "12 Mai",
-                    summary: "Arrivée et Seine",
-                    status: "completed",
-                    details: [
-                        { id: 101, time: "08:30", activity: "Atterrissage CDG", icon: "plane", type: "transport", completed: true, instructions: "Terminal 2E. Suivre les panneaux RER B.", ticketUrl: "#", webUrl: "https://www.parisaeroport.fr" },
-                        { id: 102, time: "11:00", activity: "Check-in Hôtel", icon: "map-pin", type: "logistique", completed: true, instructions: "Hôtel Liberté, 15 rue des Halles. Code entrée: 2024#.", ticketUrl: "#", webUrl: "https://www.hotel-liberte.fr" }
-                    ]
-                },
-                {
-                    id: 2,
-                    day: "Jour 2",
-                    date: "13 Mai",
-                    summary: "Culture & Louvre",
-                    status: "current",
-                    details: [
-                        { id: 201, time: "09:00", activity: "Petit déjeuner", icon: "coffee", type: "repas", completed: true, instructions: "Boulangerie juste en face de l'hôtel.", ticketUrl: null, webUrl: null },
-                        { id: 202, time: "10:30", activity: "Musée du Louvre", icon: "info", type: "visite", completed: false, instructions: "Entrée Pyramide. Billet PDF prêt.", ticketUrl: "#", webUrl: "https://www.louvre.fr" },
-                        { id: 204, time: "19:30", activity: "Dîner Quartier Latin", icon: "utensils", type: "repas", completed: false, instructions: "Réservation nom 'Jean' 19h45.", ticketUrl: "#", webUrl: "https://www.lafourchette.fr" }
-                    ]
-                }
-            ]);
+                const isCurrent = i === currentIdx;
+                const isHourly = s.dur && s.dur.toLowerCase().includes('xx');
+                const displayDur = isHourly ? "--" : (s.dur && s.dur !== "-" ? s.dur : "--");
+                const horaireVal = isHourly ? s.dur : null;
 
-            const [activeTab, setActiveTab] = useState('global'); 
-            const [selectedDayId, setSelectedDayId] = useState(2);
+                return `
+                <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6 relative transition-all duration-500 
+                    ${s.done ? 'step-completed' : ''} 
+                    ${isCurrent ? 'step-current' : 'step-future'}">
+                    
+                    <!-- EN-TÊTE -->
+                    <div class="flex items-center justify-between gap-2 mb-6 bg-slate-50/50 p-3 rounded-2xl border border-slate-100/50">
+                        <div class="flex flex-col">
+                            <span class="text-[8px] font-black text-slate-300 uppercase tracking-tighter">Départ</span>
+                            <span class="text-xs font-black ${isCurrent ? 'text-indigo-600 pulse-time' : 'text-slate-500'}">${s.start}</span>
+                        </div>
 
-            const selectedDay = tripData.find(d => d.id === selectedDayId);
-            const progress = Math.round((tripData.filter(i => i.status === 'completed').length / tripData.length) * 100);
-
-            const toggleSubActivity = (dayId, activityId) => {
-                setTripData(prev => prev.map(day => {
-                    if (day.id === dayId) {
-                        return {
-                            ...day,
-                            details: day.details.map(item => 
-                                item.id === activityId ? { ...item, completed: !item.completed } : item
-                            )
-                        };
-                    }
-                    return day;
-                }));
-            };
-
-            return (
-                <div className="min-h-screen pb-24">
-                    <header className="bg-indigo-700 text-white p-6 shadow-xl sticky top-0 z-20">
-                        <div className="max-w-2xl mx-auto">
-                            <div className="flex justify-between items-center mb-4">
-                                <h1 className="text-xl font-bold flex items-center gap-2">
-                                    <Icon name="navigation" className="w-5 h-5 text-indigo-300" /> Mon Itinéraire
-                                </h1>
-                                <span className="text-xs bg-indigo-800 px-3 py-1 rounded-full border border-indigo-400/30">{progress}% Terminé</span>
-                            </div>
-                            <div className="flex bg-indigo-800/50 p-1 rounded-xl border border-white/10">
-                                <button onClick={() => setActiveTab('global')} className={`flex-1 py-2.5 rounded-lg text-sm font-bold ${activeTab === 'global' ? 'bg-white text-indigo-700 shadow-md' : 'text-indigo-100'}`}>Voyage Complet</button>
-                                <button onClick={() => setActiveTab('detail')} className={`flex-1 py-2.5 rounded-lg text-sm font-bold ${activeTab === 'detail' ? 'bg-white text-indigo-700 shadow-md' : 'text-indigo-100'}`}>Ma Journée</button>
+                        <div class="flex flex-col items-center">
+                            <span class="text-[8px] font-black text-slate-300 uppercase tracking-tighter">Durée / Horaire</span>
+                            <div class="flex gap-1.5 mt-0.5">
+                                <span class="text-[9px] font-black bg-white px-2 py-0.5 rounded border border-slate-200 text-slate-400">${displayDur}</span>
+                                ${horaireVal ? `<span class="text-[9px] font-black bg-indigo-50 text-indigo-800 px-2 py-0.5 rounded border border-indigo-100">${horaireVal}</span>` : ''}
                             </div>
                         </div>
-                    </header>
 
-                    <main className="max-w-2xl mx-auto p-4">
-                        {activeTab === 'global' ? (
-                            <div className="space-y-4">
-                                {tripData.map(day => (
-                                    <div key={day.id} onClick={() => { setSelectedDayId(day.id); setActiveTab('detail'); }} className={`bg-white rounded-2xl p-4 shadow-sm border-2 cursor-pointer ${day.status === 'current' ? 'border-indigo-600 ring-4 ring-indigo-50' : 'border-transparent'}`}>
-                                        <div className="flex items-center gap-4">
-                                            <div className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center font-bold ${day.status === 'completed' ? 'bg-emerald-100 text-emerald-700' : day.status === 'current' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
-                                                <span className="text-[10px] uppercase">{day.date.split(' ')[1]}</span>
-                                                <span className="text-lg">{day.date.split(' ')[0]}</span>
-                                            </div>
-                                            <div className="flex-1">
-                                                <h3 className="font-bold text-slate-800">{day.summary}</h3>
-                                                <p className="text-xs text-slate-400">{day.details.length} activités</p>
-                                            </div>
-                                            <Icon name="chevron-right" className="w-5 h-5 text-slate-300" />
-                                        </div>
-                                    </div>
-                                ))}
+                        <div class="flex items-center gap-3">
+                            <div class="flex flex-col items-end">
+                                <span class="text-[8px] font-black text-slate-300 uppercase tracking-tighter">Arrivée</span>
+                                <span class="text-xs font-black ${isCurrent ? 'text-indigo-600' : 'text-slate-500'}">${s.end || '--:--'}</span>
                             </div>
-                        ) : (
-                            <div>
-                                <div className="flex items-center justify-between mb-8 mt-2">
-                                    <button onClick={() => setActiveTab('global')} className="text-indigo-600 flex items-center gap-1 text-sm font-bold"><Icon name="chevron-left" className="w-4 h-4" /> Retour</button>
-                                    <div className="text-center">
-                                        <h2 className="text-xl font-extrabold">{selectedDay.day}</h2>
-                                        <p className="text-xs font-medium text-slate-400 uppercase">{selectedDay.date} — {selectedDay.summary}</p>
-                                    </div>
-                                    <div className="w-10"></div>
-                                </div>
-                                <div className="relative ml-4 border-l-2 border-slate-200 pl-8 space-y-8">
-                                    {selectedDay.details.map(item => (
-                                        <div key={item.id} className="relative">
-                                            <button onClick={() => toggleSubActivity(selectedDay.id, item.id)} className={`absolute -left-[44px] top-1 w-8 h-8 rounded-full border-4 border-slate-50 flex items-center justify-center z-10 ${item.completed ? 'bg-emerald-500 shadow-emerald-200' : 'bg-white border-slate-200 text-slate-300'}`}>
-                                                {item.completed ? <Icon name="check-circle-2" className="w-4 h-4 text-white" /> : <div className="w-2 h-2 bg-slate-200 rounded-full" />}
-                                            </button>
-                                            <div className={`bg-white rounded-2xl p-5 shadow-sm border ${item.completed ? 'border-emerald-50 border-dashed opacity-80' : 'border-slate-100 shadow-md'}`}>
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <div className="flex items-center gap-2 text-indigo-600 font-black text-xs uppercase"><Icon name="clock" className="w-3.5 h-3.5" /> {item.time}</div>
-                                                    <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md font-bold uppercase">{item.type}</span>
-                                                </div>
-                                                <h4 className={`text-lg font-bold mb-3 ${item.completed ? 'text-slate-500 line-through' : 'text-slate-800'}`}>{item.activity}</h4>
-                                                {item.instructions && !item.completed && (
-                                                    <div className="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-100 flex gap-3 items-start">
-                                                        <Icon name="clipboard-list" className="w-4 h-4 text-amber-600 mt-0.5" />
-                                                        <div>
-                                                            <p className="text-[10px] font-black text-amber-600 uppercase mb-0.5">Directives spécifiques</p>
-                                                            <p className="text-xs text-amber-900 leading-relaxed font-medium">{item.instructions}</p>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                                <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-slate-50">
-                                                    {item.ticketUrl ? <a href={item.ticketUrl} className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-indigo-50 text-indigo-700 text-xs font-bold"><Icon name="ticket" className="w-3.5 h-3.5" /> Billet</a> : <div className="py-2.5 text-[10px] text-center text-slate-300 italic">Sans billet</div>}
-                                                    {item.webUrl ? <a href={item.webUrl} target="_blank" className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold"><Icon name="globe" className="w-3.5 h-3.5" /> Site</a> : <div className="py-2.5 text-[10px] text-center text-slate-300 italic">Sans site</div>}
-                                                </div>
-                                                {!item.completed && selectedDay.status === 'current' && (
-                                                    <div className="mt-4 p-3 bg-indigo-50 rounded-xl border border-indigo-100">
-                                                        <div className="flex items-center gap-1.5 mb-1"><Icon name="camera" className="w-3 h-3 text-indigo-400" /><label className="text-[10px] font-black text-indigo-400 uppercase">Souvenirs</label></div>
-                                                        <textarea placeholder="Notez un détail..." className="w-full bg-transparent border-none focus:ring-0 text-sm italic text-indigo-900 p-0" rows="2"></textarea>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </main>
+                            
+                            <button onclick="toggleStep(${i})" class="w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all shadow-sm
+                                ${s.done ? 'bg-slate-400 border-slate-400 text-white' : 'border-slate-300 text-transparent hover:border-indigo-400 bg-white'}">
+                                <i data-lucide="check" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
 
-                    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-slate-900/95 backdrop-blur-md px-6 py-3 rounded-full shadow-2xl z-30 border border-white/10">
-                        <Icon name="camera" className="w-5 h-5 text-white/70" />
-                        <div className="w-[1px] h-4 bg-white/20"></div>
-                        <Icon name="map-pin" className="w-5 h-5 text-white/70" />
-                        <button className="bg-indigo-600 text-white p-3 rounded-full -mt-10 border-4 border-slate-900 shadow-xl"><Icon name="chevron-right" className="w-6 h-6" /></button>
-                        <Icon name="info" className="w-5 h-5 text-white/70" />
-                        <div className="w-[1px] h-4 bg-white/20"></div>
-                        <Icon name="calendar" className="w-5 h-5 text-white/70" />
+                    <!-- ACTIVITÉ -->
+                    <div class="flex justify-between items-center gap-4 mb-4">
+                        <h4 class="text-lg font-black leading-tight flex-1">
+                            <a href="${s.map}" target="_blank" class="text-slate-700 hover:text-indigo-600 transition-colors flex items-center gap-2">
+                                <span class="underline underline-offset-8 decoration-slate-100">${s.act}</span>
+                                <i data-lucide="map" class="w-5 h-5 text-indigo-600 shrink-0"></i>
+                            </a>
+                        </h4>
+                    </div>
+
+                    <!-- COMMENTAIRE (Toujours visible) -->
+                    <div class="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 flex gap-3 items-start">
+                        <i data-lucide="info" class="w-4 h-4 text-slate-400 mt-0.5"></i>
+                        <p class="text-[11px] text-slate-500 leading-relaxed font-semibold italic">"${s.comm}"</p>
+                    </div>
+
+                    <!-- BLOC MASQUÉ SI NON ACTIF (Passé ou Futur) -->
+                    <div class="${!isCurrent ? 'hidden' : 'mt-5'}">
+                        ${s.price !== '-' ? `
+                            <div class="inline-flex items-center gap-1.5 text-[10px] font-black text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 mb-4">
+                                <i data-lucide="wallet" class="w-3 h-3"></i>
+                                ${s.price}
+                            </div>` : ''}
+
+                        <!-- SOUVENIRS -->
+                        <div class="mb-5">
+                            <div class="flex justify-between items-center mb-2 px-1">
+                                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Écrire mes souvenirs...</label>
+                                 <span class="text-[8px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full animate-pulse">Étape en cours</span>
+                            </div>
+                            <textarea placeholder="Une anecdote, une photo, un resto..." 
+                                class="w-full bg-white border border-slate-100 rounded-2xl p-4 text-[12px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-100 resize-none transition-all shadow-inner font-medium min-h-[120px] ring-2 ring-indigo-50"></textarea>
+                        </div>
+
+                        <!-- ACTIONS -->
+                        <div class="flex gap-3">
+                            <a href="${s.web || '#'}" target="_blank" class="flex-1 border py-3 rounded-2xl flex items-center justify-center transition-all ${s.web ? 'bg-white border-slate-200 text-slate-600 shadow-sm' : 'bg-slate-50 border-slate-100 text-slate-200 opacity-50 pointer-events-none'}">
+                                <i data-lucide="external-link" class="w-4 h-4"></i>
+                                <span class="text-[10px] font-black ml-2 uppercase tracking-tight">Info</span>
+                            </a>
+                            <button class="flex-1 bg-indigo-50 text-indigo-700 py-3 rounded-2xl flex items-center justify-center border border-indigo-100 active:scale-95 transition-all shadow-sm">
+                                <i data-lucide="credit-card" class="w-4 h-4"></i>
+                                <span class="text-[10px] font-black ml-2 uppercase tracking-tight">Billet</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            );
-        };
+                `}).join('');
+            lucide.createIcons();
+            updateProgress();
+        }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        function updateProgress() {
+            const all = tripData.flatMap(d => d.steps).filter(s => s.act);
+            const done = all.filter(s => s.done).length;
+            const pct = Math.round((done/all.length)*100);
+            document.getElementById('global-pct').innerText = pct + "%";
+            document.getElementById('global-pct').parentElement.style.background = `linear-gradient(90deg, #4338ca ${pct}%, rgba(255,255,255,0.1) ${pct}%)`;
+        }
+
+        window.onload = () => { renderDayList(); updateProgress(); };
     </script>
 </body>
 </html>
