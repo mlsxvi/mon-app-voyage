@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Itinéraire de Voyage</title>
+    <!-- Bibliothèques externes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Lucide Icons (SVG) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Importation manuelle des icônes Lucide pour l'environnement navigateur
+        const Icon = ({ name, className }) => {
+            useEffect(() => {
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            }, [name]);
+            return <i data-lucide={name} className={className}></i>;
+        };
+
+        const App = () => {
+            const [tripData, setTripData] = useState([
+                {
+                    id: 1,
+                    day: "Jour 1",
+                    date: "12 Mai",
+                    summary: "Arrivée et Seine",
+                    status: "completed",
+                    details: [
+                        { id: 101, time: "08:30", activity: "Atterrissage CDG", icon: "plane", type: "transport", completed: true, instructions: "Terminal 2E. Suivre les panneaux RER B.", ticketUrl: "#", webUrl: "https://www.parisaeroport.fr" },
+                        { id: 102, time: "11:00", activity: "Check-in Hôtel", icon: "map-pin", type: "logistique", completed: true, instructions: "Hôtel Liberté, 15 rue des Halles. Code entrée: 2024#.", ticketUrl: "#", webUrl: "https://www.hotel-liberte.fr" }
+                    ]
+                },
+                {
+                    id: 2,
+                    day: "Jour 2",
+                    date: "13 Mai",
+                    summary: "Culture & Louvre",
+                    status: "current",
+                    details: [
+                        { id: 201, time: "09:00", activity: "Petit déjeuner", icon: "coffee", type: "repas", completed: true, instructions: "Boulangerie juste en face de l'hôtel.", ticketUrl: null, webUrl: null },
+                        { id: 202, time: "10:30", activity: "Musée du Louvre", icon: "info", type: "visite", completed: false, instructions: "Entrée Pyramide. Billet PDF prêt.", ticketUrl: "#", webUrl: "https://www.louvre.fr" },
+                        { id: 204, time: "19:30", activity: "Dîner Quartier Latin", icon: "utensils", type: "repas", completed: false, instructions: "Réservation nom 'Jean' 19h45.", ticketUrl: "#", webUrl: "https://www.lafourchette.fr" }
+                    ]
+                }
+            ]);
+
+            const [activeTab, setActiveTab] = useState('global'); 
+            const [selectedDayId, setSelectedDayId] = useState(2);
+
+            const selectedDay = tripData.find(d => d.id === selectedDayId);
+            const progress = Math.round((tripData.filter(i => i.status === 'completed').length / tripData.length) * 100);
+
+            const toggleSubActivity = (dayId, activityId) => {
+                setTripData(prev => prev.map(day => {
+                    if (day.id === dayId) {
+                        return {
+                            ...day,
+                            details: day.details.map(item => 
+                                item.id === activityId ? { ...item, completed: !item.completed } : item
+                            )
+                        };
+                    }
+                    return day;
+                }));
+            };
+
+            return (
+                <div className="min-h-screen pb-24">
+                    <header className="bg-indigo-700 text-white p-6 shadow-xl sticky top-0 z-20">
+                        <div className="max-w-2xl mx-auto">
+                            <div className="flex justify-between items-center mb-4">
+                                <h1 className="text-xl font-bold flex items-center gap-2">
+                                    <Icon name="navigation" className="w-5 h-5 text-indigo-300" /> Mon Itinéraire
+                                </h1>
+                                <span className="text-xs bg-indigo-800 px-3 py-1 rounded-full border border-indigo-400/30">{progress}% Terminé</span>
+                            </div>
+                            <div className="flex bg-indigo-800/50 p-1 rounded-xl border border-white/10">
+                                <button onClick={() => setActiveTab('global')} className={`flex-1 py-2.5 rounded-lg text-sm font-bold ${activeTab === 'global' ? 'bg-white text-indigo-700 shadow-md' : 'text-indigo-100'}`}>Voyage Complet</button>
+                                <button onClick={() => setActiveTab('detail')} className={`flex-1 py-2.5 rounded-lg text-sm font-bold ${activeTab === 'detail' ? 'bg-white text-indigo-700 shadow-md' : 'text-indigo-100'}`}>Ma Journée</button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main className="max-w-2xl mx-auto p-4">
+                        {activeTab === 'global' ? (
+                            <div className="space-y-4">
+                                {tripData.map(day => (
+                                    <div key={day.id} onClick={() => { setSelectedDayId(day.id); setActiveTab('detail'); }} className={`bg-white rounded-2xl p-4 shadow-sm border-2 cursor-pointer ${day.status === 'current' ? 'border-indigo-600 ring-4 ring-indigo-50' : 'border-transparent'}`}>
+                                        <div className="flex items-center gap-4">
+                                            <div className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center font-bold ${day.status === 'completed' ? 'bg-emerald-100 text-emerald-700' : day.status === 'current' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                                                <span className="text-[10px] uppercase">{day.date.split(' ')[1]}</span>
+                                                <span className="text-lg">{day.date.split(' ')[0]}</span>
+                                            </div>
+                                            <div className="flex-1">
+                                                <h3 className="font-bold text-slate-800">{day.summary}</h3>
+                                                <p className="text-xs text-slate-400">{day.details.length} activités</p>
+                                            </div>
+                                            <Icon name="chevron-right" className="w-5 h-5 text-slate-300" />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div>
+                                <div className="flex items-center justify-between mb-8 mt-2">
+                                    <button onClick={() => setActiveTab('global')} className="text-indigo-600 flex items-center gap-1 text-sm font-bold"><Icon name="chevron-left" className="w-4 h-4" /> Retour</button>
+                                    <div className="text-center">
+                                        <h2 className="text-xl font-extrabold">{selectedDay.day}</h2>
+                                        <p className="text-xs font-medium text-slate-400 uppercase">{selectedDay.date} — {selectedDay.summary}</p>
+                                    </div>
+                                    <div className="w-10"></div>
+                                </div>
+                                <div className="relative ml-4 border-l-2 border-slate-200 pl-8 space-y-8">
+                                    {selectedDay.details.map(item => (
+                                        <div key={item.id} className="relative">
+                                            <button onClick={() => toggleSubActivity(selectedDay.id, item.id)} className={`absolute -left-[44px] top-1 w-8 h-8 rounded-full border-4 border-slate-50 flex items-center justify-center z-10 ${item.completed ? 'bg-emerald-500 shadow-emerald-200' : 'bg-white border-slate-200 text-slate-300'}`}>
+                                                {item.completed ? <Icon name="check-circle-2" className="w-4 h-4 text-white" /> : <div className="w-2 h-2 bg-slate-200 rounded-full" />}
+                                            </button>
+                                            <div className={`bg-white rounded-2xl p-5 shadow-sm border ${item.completed ? 'border-emerald-50 border-dashed opacity-80' : 'border-slate-100 shadow-md'}`}>
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <div className="flex items-center gap-2 text-indigo-600 font-black text-xs uppercase"><Icon name="clock" className="w-3.5 h-3.5" /> {item.time}</div>
+                                                    <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md font-bold uppercase">{item.type}</span>
+                                                </div>
+                                                <h4 className={`text-lg font-bold mb-3 ${item.completed ? 'text-slate-500 line-through' : 'text-slate-800'}`}>{item.activity}</h4>
+                                                {item.instructions && !item.completed && (
+                                                    <div className="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-100 flex gap-3 items-start">
+                                                        <Icon name="clipboard-list" className="w-4 h-4 text-amber-600 mt-0.5" />
+                                                        <div>
+                                                            <p className="text-[10px] font-black text-amber-600 uppercase mb-0.5">Directives spécifiques</p>
+                                                            <p className="text-xs text-amber-900 leading-relaxed font-medium">{item.instructions}</p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-slate-50">
+                                                    {item.ticketUrl ? <a href={item.ticketUrl} className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-indigo-50 text-indigo-700 text-xs font-bold"><Icon name="ticket" className="w-3.5 h-3.5" /> Billet</a> : <div className="py-2.5 text-[10px] text-center text-slate-300 italic">Sans billet</div>}
+                                                    {item.webUrl ? <a href={item.webUrl} target="_blank" className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold"><Icon name="globe" className="w-3.5 h-3.5" /> Site</a> : <div className="py-2.5 text-[10px] text-center text-slate-300 italic">Sans site</div>}
+                                                </div>
+                                                {!item.completed && selectedDay.status === 'current' && (
+                                                    <div className="mt-4 p-3 bg-indigo-50 rounded-xl border border-indigo-100">
+                                                        <div className="flex items-center gap-1.5 mb-1"><Icon name="camera" className="w-3 h-3 text-indigo-400" /><label className="text-[10px] font-black text-indigo-400 uppercase">Souvenirs</label></div>
+                                                        <textarea placeholder="Notez un détail..." className="w-full bg-transparent border-none focus:ring-0 text-sm italic text-indigo-900 p-0" rows="2"></textarea>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </main>
+
+                    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-slate-900/95 backdrop-blur-md px-6 py-3 rounded-full shadow-2xl z-30 border border-white/10">
+                        <Icon name="camera" className="w-5 h-5 text-white/70" />
+                        <div className="w-[1px] h-4 bg-white/20"></div>
+                        <Icon name="map-pin" className="w-5 h-5 text-white/70" />
+                        <button className="bg-indigo-600 text-white p-3 rounded-full -mt-10 border-4 border-slate-900 shadow-xl"><Icon name="chevron-right" className="w-6 h-6" /></button>
+                        <Icon name="info" className="w-5 h-5 text-white/70" />
+                        <div className="w-[1px] h-4 bg-white/20"></div>
+                        <Icon name="calendar" className="w-5 h-5 text-white/70" />
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
